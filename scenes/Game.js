@@ -14,15 +14,23 @@ export default class Game extends Phaser.Scene {
    
    this.load.image("piso", "../public/assets/Piso2.png");
    this.load.image("tocon", "../public/assets/Tocon.png");
-   this.load.image("personaje", "../public/assets/Finn.png")
+   this.load.image("personaje", "../public/assets/Finn.png");
+   this.load.image("tronco", "../public/assets/Tronco.png");
   }
 
   create() {
     this.addFondo();
     this.addPiso();
-    this.addTocon();
+    this.addObstaculos();
     this.addPersonaje();
     this.addTeclas();
+
+    this.time.addEvent({
+      delay: 5000,
+      callback: this.createObjetos,
+      callbackScope: this,
+      loop: true,
+    })
   }
 
   update() {
@@ -51,27 +59,30 @@ export default class Game extends Phaser.Scene {
     this.pisos.create(435, 545, "piso").setScale(0.35).refreshBody();
   }
 
-  addTocon() {
-    this.tocones = this.physics.add.group();
-    const tocon = this.tocones.create(850, 428, "tocon").setScale(0.25);
-    this.physics.add.collider(this.tocones, this.pisos);
-    this.time.addEvent({
-      delay: 5000,
-      callback: this.createTocon,
-      callbackScope: this,
-      loop: true
-    })
+  addObstaculos() {
+    this.objetos = this.physics.add.group();
+    this.physics.add.collider(this.objetos, this.pisos);
+    
   }
 
-  createTocon() {
-    const x = 850;
-    const y = 439;
-    const tocon = this.tocones.create(x, y, "tocon");
-    tocon.setScale(0.25).refreshBody();
-    tocon.setVelocityX(-200);
-    tocon.setImmovable(true);
-    tocon.body.allowGravity = false;
-    this.physics.add.collider(this.personaje, this.tocones);
+  createObjetos() {
+    const tipos = ["tocon", "tronco"];
+
+    const tipo = Phaser.Math.RND.pick(tipos);
+    let objeto = this.objetos.create(
+      855,
+      439,
+      tipo
+    ).setScale(0.25);
+    objeto.setVelocityX(-200);
+    
+    if (tipo === "tronco") {
+      objeto.setScale(0.15);
+    }
+
+    this.physics.add.collider(this.personaje, this.objetos);
+    objeto.setImmovable(true);
+    objeto.body.allowGravity = false;
   }
   
   addPersonaje() {
