@@ -20,16 +20,9 @@ export default class Game extends Phaser.Scene {
   create() {
     this.addFondo();
     this.addPiso();
-    this.addObjetos();
+    this.addTocon();
     this.addPersonaje();
     this.addTeclas();
-   
-    this.time.addEvent({
-      delay: 3000,
-      callback: this.addObjetos,
-      callbackScope: this,
-      loop: true,
-    });
   }
 
   update() {
@@ -58,19 +51,28 @@ export default class Game extends Phaser.Scene {
     this.pisos.create(435, 545, "piso").setScale(0.35).refreshBody();
   }
 
-  addObjetos() {
-    this.objetogrupo = this.physics.add.group();
-    const objeto = this.physics.add.sprite(700, 400, "tocon").setScale(0.3);
-    this.physics.add.collider(this.objetogrupo, this.pisos);
-    this.physics.add.collider(this.objetogrupo, this.personaje);
-
-this.objetogrupo.add(objeto);
-    
-this.objetogrupo.setVelocityX(-100)
-  
-
+  addTocon() {
+    this.tocones = this.physics.add.group();
+    const tocon = this.tocones.create(850, 428, "tocon").setScale(0.25);
+    this.physics.add.collider(this.tocones, this.pisos);
+    this.time.addEvent({
+      delay: 5000,
+      callback: this.createTocon,
+      callbackScope: this,
+      loop: true
+    })
   }
 
+  createTocon() {
+    const x = 850;
+    const y = 439;
+    const tocon = this.tocones.create(x, y, "tocon");
+    tocon.setScale(0.25).refreshBody();
+    tocon.setVelocityX(-200);
+    tocon.setImmovable(true);
+    tocon.body.allowGravity = false;
+    this.physics.add.collider(this.personaje, this.tocones);
+  }
   
   addPersonaje() {
     this.personaje = this.physics.add.sprite(100, 100, "personaje");
