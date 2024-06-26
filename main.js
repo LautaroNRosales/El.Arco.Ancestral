@@ -2,8 +2,8 @@ import Game from "./scenes/Game.js";
 
 const config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: 1500,
+  height: 1000,
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -19,8 +19,8 @@ const config = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: { y: 200 },
-      debug: true,
+      gravity: { y: 200},
+      debug: false,
     },
   },
   scene: [Game],

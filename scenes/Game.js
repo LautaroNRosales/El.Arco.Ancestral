@@ -3,6 +3,7 @@
 export default class Game extends Phaser.Scene {
   constructor() {
     super("main");
+    this.backgroundVelocity = -2;
   }
 
   init() {
@@ -24,13 +25,7 @@ export default class Game extends Phaser.Scene {
     this.addObstaculos();
     this.addPersonaje();
     this.addTeclas();
-
-    this.time.addEvent({
-      delay: 5000,
-      callback: this.createObjetos,
-      callbackScope: this,
-      loop: true,
-    })
+    this.addEventos();
   }
 
   update() {
@@ -44,56 +39,84 @@ export default class Game extends Phaser.Scene {
   if (this.cursor.up.isDown && this.personaje.body.touching.down) {
     this.personaje.setVelocityY(-330)
   }
+
+  this.moveFondo();
+  this.movePiso();
   }
 
   addFondo() {
     this.centerX = this.game.config.width / 2;
     this.centerY = this.game.config.height / 2;
-    this.background = this.add.image(this.centerX, this.centerY, "muro");
+    this.background = this.add.tileSprite(this.centerX, this.centerY, this.game.config.width, this.game.config.height, "muro").setScale(0.1, 0.1);
     this.background.displayWidth = this.game.config.width;
     this.background.displayHeight = this.game.config.height;
   }
 
+  moveFondo() {
+    this.background.tilePositionX -= this.backgroundVelocity;
+  }
+
   addPiso() {
-    this.pisos = this.physics.add.staticGroup();
-    this.pisos.create(435, 545, "piso").setScale(0.35).refreshBody();
+    this.piso = this.add.tileSprite(750, 915, this.game.config.width, 325, "piso").setScale(1, 0.6);
+    this.physics.add.existing(this.piso, true);
+    //this.piso.body.setSize(1500, 199);
+  }
+
+  movePiso() {
+    this.piso.tilePositionX += 2; // Ajusta este valor para cambiar la velocidad del piso
   }
 
   addObstaculos() {
     this.objetos = this.physics.add.group();
-    this.physics.add.collider(this.objetos, this.pisos);
-    
   }
 
   createObjetos() {
     const tipos = ["tocon", "tronco"];
 
     const tipo = Phaser.Math.RND.pick(tipos);
-    let objeto = this.objetos.create(
-      855,
-      439,
-      tipo
-    ).setScale(0.25);
-    objeto.setVelocityX(-200);
-    
+  
+    let yPos = 749; // Coordenada 'y' por defecto
+
     if (tipo === "tronco") {
-      objeto.setScale(0.15);
+      yPos = 773; // Ajusta este valor para la coordenada 'y' del tronco
     }
 
-    this.physics.add.collider(this.personaje, this.objetos);
+    let objeto = this.objetos.create(
+      1570, // Coordenada 'x'
+      yPos, // Coordenada 'y'
+      tipo
+    ).setScale(0.35);
+  
+    objeto.setVelocityX(-200);
+
+    if (tipo === "tronco") {
+      objeto.setScale(0.20);
+    }
+
+   this.physics.add.collider(this.personaje, this.objetos);
     objeto.setImmovable(true);
     objeto.body.allowGravity = false;
   }
   
   addPersonaje() {
     this.personaje = this.physics.add.sprite(100, 100, "personaje");
-    this.personaje.setScale(0.1);
+    this.personaje.setScale(0.15);
     //this.personaje.body.setSize(1000,1000,0,100)
     this.personaje.setCollideWorldBounds(true);
-    this.physics.add.collider(this.personaje, this.pisos);
+    this.physics.add.collider(this.personaje, this.piso);
   }
 
   addTeclas() {
     this.cursor = this.input.keyboard.createCursorKeys();
+  }
+
+  addEventos() {
+    //obstaculos
+    this.time.addEvent({
+      delay: 5000,
+      callback: this.createObjetos,
+      callbackScope: this,
+      loop: true,
+    });
   }
 }
