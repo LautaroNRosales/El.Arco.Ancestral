@@ -11,12 +11,17 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
-   this.load.image("muro", "../public/assets/Muro.png");
-   
-   this.load.image("piso", "../public/assets/Piso2.png");
-   this.load.image("tocon", "../public/assets/Tocon.png");
-   this.load.image("personaje", "../public/assets/Finn.png");
-   this.load.image("tronco", "../public/assets/Tronco.png");
+   this.load.image("arboles", "./public/assets/Arboles.png");
+   this.load.image("montanas", "./public/assets/Montañas.png");
+   this.load.image("piso", "./public/assets/Piso2.png");
+   this.load.image("tocon", "./public/assets/Tocon.png");
+   this.load.image("personaje", "./public/assets/Finn.png");
+   this.load.image("tronco", "./public/assets/Tronco.png");
+   this.load.image("soporte", "./public/assets/Soporte.png");
+   this.load.spritesheet("roca", "./public/assets/Piedra-Sheet.png", {
+    frameWidth: 400,
+    frameHeight: 400,
+   });
   }
 
   create() {
@@ -47,7 +52,7 @@ export default class Game extends Phaser.Scene {
   addFondo() {
     this.centerX = this.game.config.width / 2;
     this.centerY = this.game.config.height / 2;
-    this.background = this.add.tileSprite(this.centerX, this.centerY, this.game.config.width, this.game.config.height, "muro").setScale(0.1, 0.1);
+    this.background = this.add.tileSprite(this.centerX, this.centerY, this.game.config.width, this.game.config.height, "montanas");
     this.background.displayWidth = this.game.config.width;
     this.background.displayHeight = this.game.config.height;
   }
