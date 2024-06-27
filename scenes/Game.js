@@ -11,14 +11,14 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
-   this.load.image("arboles", "./public/assets/Arboles.png");
-   this.load.image("montanas", "./public/assets/Montañas.png");
-   this.load.image("piso", "./public/assets/Piso2.png");
-   this.load.image("tocon", "./public/assets/Tocon.png");
-   this.load.image("personaje", "./public/assets/Finn.png");
-   this.load.image("tronco", "./public/assets/Tronco.png");
-   this.load.image("soporte", "./public/assets/Soporte.png");
-   this.load.spritesheet("roca", "./public/assets/Piedra-Sheet.png", {
+   this.load.image("arboles", "./public/Arboles.png");
+   this.load.image("montanas", "./public/Montañas.png");
+   this.load.image("piso", "./public/Piso2.png");
+   this.load.image("tocon", "./public/Tocon.png");
+   this.load.image("personaje", "./public/Finn.png");
+   this.load.image("tronco", "./public/Tronco.png");
+   this.load.image("soporte", "./public/Soporte.png");
+   this.load.spritesheet("roca", "./public/Piedra-Sheet.png", {
     frameWidth: 400,
     frameHeight: 400,
    });
