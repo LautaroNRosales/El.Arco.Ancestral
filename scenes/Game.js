@@ -3,7 +3,12 @@
 export default class Game extends Phaser.Scene {
   constructor() {
     super("main");
-    this.backgroundVelocity = -2;
+    this.gameStarted = false;
+    this.puntos = 0;
+    this.puntosText;
+    this.velocidadObjetos = -200;
+    this.aumentoVelocidad = -25;
+    this.tiempoUltimoAumento = 0;
   }
 
   init() {
@@ -12,16 +17,19 @@ export default class Game extends Phaser.Scene {
 
   preload() {
    this.load.image("arboles", "./public/Arboles.png");
-   this.load.image("montanas", "./public/Montañas.png");
    this.load.image("piso", "./public/Piso2.png");
    this.load.image("tocon", "./public/Tocon.png");
-   this.load.image("personaje", "./public/Finn.png");
+   this.load.image("arco", "./public/Arco.png");
    this.load.image("tronco", "./public/Tronco.png");
    this.load.image("soporte", "./public/Soporte.png");
    this.load.spritesheet("roca", "./public/Piedra-Sheet.png", {
     frameWidth: 400,
     frameHeight: 400,
    });
+   this.load.spritesheet("personaje", "./public/Personaje-Sheet.png", {
+    frameWidth: 320,
+    frameHeight: 420,
+  });
   }
 
   create() {
@@ -30,23 +38,40 @@ export default class Game extends Phaser.Scene {
     this.addObstaculos();
     this.addPersonaje();
     this.addTeclas();
-    this.addEventos();
+    this.addArco();
+    this.addPuntos();
+    this.tiempoUltimoAumento = this.time.now;
   }
 
-  update() {
-  if (this.cursor.left.isDown) {
-    this.personaje.setVelocityX(-160);
-  } else if (this.cursor.right.isDown) {
-    this.personaje.setVelocityX(160);
-  } else {
-    this.personaje.setVelocityX(0);
-  }
-  if (this.cursor.up.isDown && this.personaje.body.touching.down) {
-    this.personaje.setVelocityY(-330)
-  }
+  update(time, delta) {
+    if (this.cursor.left.isDown) {
+      this.personaje.setVelocityX(-160);
+      this.personaje.anims.play('left', true);
+    } else if (this.cursor.right.isDown) {
+      this.personaje.setVelocityX(160);
+      this.personaje.anims.play('right', true);
+    } else {
+      this.personaje.setVelocityX(0);
+      this.personaje.anims.play('turn');
+    }
+    if (this.cursor.up.isDown && this.personaje.body.touching.down) {
+      this.personaje.setVelocityY(-330);
+    }
 
-  this.moveFondo();
-  this.movePiso();
+    if (this.gameStarted) {
+      const tiempoActual = time;
+      const tiempoTranscurrido = tiempoActual - this.tiempoUltimoAumento;
+
+      if (tiempoTranscurrido > 1000) {
+        this.velocidadObjetos += this.aumentoVelocidad;
+        this.tiempoUltimoAumento = tiempoActual;
+        this.puntos += 10;
+        this.puntosText.setText(`Puntos: ${this.puntos}`);
+      }
+    }
+
+    this.moveFondo(this.personaje.body.velocity.x);
+    this.movePiso(this.personaje.body.velocity.x);
   }
 
   addFondo() {
@@ -57,8 +82,8 @@ export default class Game extends Phaser.Scene {
     this.background.displayHeight = this.game.config.height;
   }
 
-  moveFondo() {
-    this.background.tilePositionX -= this.backgroundVelocity;
+  moveFondo(personajeVelocityX) {
+    this.background.tilePositionX += personajeVelocityX / 10;
   }
 
   addPiso() {
@@ -67,8 +92,8 @@ export default class Game extends Phaser.Scene {
     //this.piso.body.setSize(1500, 199);
   }
 
-  movePiso() {
-    this.piso.tilePositionX += 2; // Ajusta este valor para cambiar la velocidad del piso
+  movePiso(personajeVelocityX) {
+    this.piso.tilePositionX += personajeVelocityX / 10; // Ajusta este valor para cambiar la velocidad del piso
   }
 
   addObstaculos() {
@@ -76,6 +101,8 @@ export default class Game extends Phaser.Scene {
   }
 
   createObjetos() {
+    if (!this.gameStarted) return;
+
     const tipos = ["tocon", "tronco"];
 
     const tipo = Phaser.Math.RND.pick(tipos);
@@ -92,7 +119,7 @@ export default class Game extends Phaser.Scene {
       tipo
     ).setScale(0.35);
   
-    objeto.setVelocityX(-200);
+    objeto.setVelocityX(this.velocidadObjetos);
 
     if (tipo === "tronco") {
       objeto.setScale(0.20);
@@ -101,27 +128,93 @@ export default class Game extends Phaser.Scene {
    this.physics.add.collider(this.personaje, this.objetos);
     objeto.setImmovable(true);
     objeto.body.allowGravity = false;
+    this.physics.add.collider(this.roca, objeto, this.removeObject, null, this);
+  }
+
+  removeObject(roca, objeto) {
+    objeto.destroy();
   }
   
   addPersonaje() {
-    this.personaje = this.physics.add.sprite(100, 745, "personaje");
-    this.personaje.setScale(0.15);
-    //this.personaje.body.setSize(1000,1000,0,100)
+    this.personaje = this.physics.add.sprite(100, 550, "personaje").setScale(0.5);
+    this.personaje.setBounce(0.2);
     this.personaje.setCollideWorldBounds(true);
+
+    this.anims.create({
+      key: "left",
+      frames: this.anims.generateFrameNumbers("personaje", { start: 4, end: 7 }),
+      frameRate: 10,
+      repeat: -1
+    });
+
+    this.anims.create({
+      key: "turn",
+      frames: [{ key: "personaje", frame: 8 }],
+      frameRate: 1
+    });
+
+    this.anims.create({
+      key: "right",
+      frames: this.anims.generateFrameNumbers("personaje", { start: 0, end: 3 }),
+      frameRate: 10,
+      repeat: -1
+    });
+
     this.physics.add.collider(this.personaje, this.piso);
   }
+
 
   addTeclas() {
     this.cursor = this.input.keyboard.createCursorKeys();
   }
 
+  addArco() {
+    this.arco = this.physics.add.sprite(500, 700, "arco").setScale(0.4);
+    this.physics.add.collider(this.arco, this.piso);
+    this.physics.add.overlap(this.personaje, this.arco, this.collectArco, null, this);
+  }
+
+  collectArco(personaje, arco) {
+    arco.disableBody(true, true);
+    this.gameStarted = true; // Empieza el juego cuando el arco es recogido
+    this.addRoca();
+    this.addEventos();
+    this.puntosText.visible = true;
+  }
+
+  addRoca() {
+    this.roca = this.physics.add.sprite(50, 688, "roca").setScale(0.7);
+    this.roca.setCollideWorldBounds(true);
+    this.physics.add.collider(this.roca, this.piso);
+    this.physics.add.collider(this.personaje, this.roca, this.handleCollision, null, this);
+    this.roca.setImmovable(true);
+    this.roca.body.allowGravity = false;
+    this.roca.setVelocityX(0);
+    this.roca.setX(0);
+    this.anims.create({
+      key: "right",
+      frames: this.anims.generateFrameNumbers("roca", { start: 0, end: 17 }), // Updated end frame to 16
+      frameRate: 10,
+      repeat: -1
+    });
+  }
+
+  handleCollision(personaje, roca) {
+    this.scene.start("End", { score: this.puntos, gameOver: true});
+  }
+
   addEventos() {
     //obstaculos
     this.time.addEvent({
-      delay: 5000,
+      delay: 3500,
       callback: this.createObjetos,
       callbackScope: this,
       loop: true,
     });
+  }
+
+  addPuntos() {
+    this.puntosText = this.add.text(16, 16, 'Puntos: 0', {fontSize: '32px', fill:'#000'});
+    this.puntosText.visible = false;
   }
 }
