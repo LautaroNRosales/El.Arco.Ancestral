@@ -104,7 +104,7 @@ export default class Game extends Phaser.Scene {
   }
   
   addPersonaje() {
-    this.personaje = this.physics.add.sprite(100, 100, "personaje");
+    this.personaje = this.physics.add.sprite(100, 745, "personaje");
     this.personaje.setScale(0.15);
     //this.personaje.body.setSize(1000,1000,0,100)
     this.personaje.setCollideWorldBounds(true);
