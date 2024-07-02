@@ -52,7 +52,7 @@ export default class Game extends Phaser.Scene {
   addFondo() {
     this.centerX = this.game.config.width / 2;
     this.centerY = this.game.config.height / 2;
-    this.background = this.add.tileSprite(this.centerX, this.centerY, this.game.config.width, this.game.config.height, "montanas");
+    this.background = this.add.tileSprite(this.centerX, this.centerY, this.game.config.width, this.game.config.height, "arboles");
     this.background.displayWidth = this.game.config.width;
     this.background.displayHeight = this.game.config.height;
   }
