@@ -21,7 +21,6 @@ export default class Game extends Phaser.Scene {
    this.load.image("tocon", "./public/Tocon.png");
    this.load.image("arco", "./public/Arco.png");
    this.load.image("tronco", "./public/Tronco.png");
-   this.load.image("soporte", "./public/Soporte.png");
    this.load.spritesheet("roca", "./public/Piedra-Sheet.png", {
     frameWidth: 400,
     frameHeight: 400,
@@ -62,7 +61,7 @@ export default class Game extends Phaser.Scene {
       const tiempoActual = time;
       const tiempoTranscurrido = tiempoActual - this.tiempoUltimoAumento;
 
-      if (tiempoTranscurrido > 1000) {
+      if (tiempoTranscurrido > 500) {
         this.velocidadObjetos += this.aumentoVelocidad;
         this.tiempoUltimoAumento = tiempoActual;
         this.puntos += 10;
@@ -72,6 +71,10 @@ export default class Game extends Phaser.Scene {
 
     this.moveFondo(this.personaje.body.velocity.x);
     this.movePiso(this.personaje.body.velocity.x);
+
+    if (this.input.keyboard.checkDown(this.r, 500)) {
+      this.scene.restart();
+    }
   }
 
   addFondo() {
@@ -166,6 +169,7 @@ export default class Game extends Phaser.Scene {
 
   addTeclas() {
     this.cursor = this.input.keyboard.createCursorKeys();
+    this.r = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
   }
 
   addArco() {
@@ -192,11 +196,12 @@ export default class Game extends Phaser.Scene {
     this.roca.setVelocityX(0);
     this.roca.setX(0);
     this.anims.create({
-      key: "right",
+      key: "rocaAnim",
       frames: this.anims.generateFrameNumbers("roca", { start: 0, end: 17 }), // Updated end frame to 16
       frameRate: 10,
       repeat: -1
     });
+    this.roca.anims.play("rocaAnim");
   }
 
   handleCollision(personaje, roca) {

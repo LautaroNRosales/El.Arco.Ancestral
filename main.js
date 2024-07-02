@@ -1,4 +1,7 @@
+import Start from "./scenes/Start.js";
 import Game from "./scenes/Game.js";
+import End from "./scenes/End.js";
+
 
 const config = {
   type: Phaser.AUTO,
@@ -20,10 +23,10 @@ const config = {
     default: "arcade",
     arcade: {
       gravity: { y: 200},
-      debug: true,
+      debug: false,
     },
   },
-  scene: [Game],
+  scene: [Start, Game, End],
 };
 
 window.game = new Phaser.Game(config);
