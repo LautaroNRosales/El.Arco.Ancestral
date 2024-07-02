@@ -3,16 +3,15 @@
 export default class Game extends Phaser.Scene {
   constructor() {
     super("main");
+  }
+
+  init() {
     this.gameStarted = false;
     this.puntos = 0;
     this.puntosText;
     this.velocidadObjetos = -200;
     this.aumentoVelocidad = -25;
     this.tiempoUltimoAumento = 0;
-  }
-
-  init() {
- 
   }
 
   preload() {
