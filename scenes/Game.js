@@ -1,5 +1,3 @@
-// URL to explain PHASER scene: https://rexrainbow.github.io/phaser3-rex-notes/docs/site/scene/
-
 export default class Game extends Phaser.Scene {
   constructor() {
     super("main");
@@ -15,19 +13,19 @@ export default class Game extends Phaser.Scene {
   }
 
   preload() {
-   this.load.image("arboles", "./public/Arboles.png");
-   this.load.image("piso", "./public/Piso2.png");
-   this.load.image("tocon", "./public/Tocon.png");
-   this.load.image("arco", "./public/Arco.png");
-   this.load.image("tronco", "./public/Tronco.png");
-   this.load.spritesheet("roca", "./public/Piedra-Sheet.png", {
-    frameWidth: 400,
-    frameHeight: 400,
-   });
-   this.load.spritesheet("personaje", "./public/Personaje-Sheet.png", {
-    frameWidth: 320,
-    frameHeight: 420,
-  });
+    this.load.image("arboles", "./public/Arboles.png");
+    this.load.image("piso", "./public/Piso2.png");
+    this.load.image("tocon", "./public/Tocon.png");
+    this.load.image("arco", "./public/Arco.png");
+    this.load.image("tronco", "./public/Tronco.png");
+    this.load.spritesheet("roca", "./public/Piedra-Sheet.png", {
+      frameWidth: 400,
+      frameHeight: 400,
+    });
+    this.load.spritesheet("personaje", "./public/Personaje-Sheet.png", {
+      frameWidth: 320,
+      frameHeight: 420,
+    });
   }
 
   create() {
@@ -36,22 +34,12 @@ export default class Game extends Phaser.Scene {
     this.addObstaculos();
     this.addPersonaje();
     this.addTeclas();
-    this.addArco();
     this.addPuntos();
     this.tiempoUltimoAumento = this.time.now;
+    this.createArcoEvent();
   }
 
   update(time, delta) {
-    if (this.cursor.left.isDown) {
-      this.personaje.setVelocityX(-160);
-      this.personaje.anims.play('left', true);
-    } else if (this.cursor.right.isDown) {
-      this.personaje.setVelocityX(160);
-      this.personaje.anims.play('right', true);
-    } else {
-      this.personaje.setVelocityX(0);
-      this.personaje.anims.play('turn');
-    }
     if (this.cursor.up.isDown && this.personaje.body.touching.down) {
       this.personaje.setVelocityY(-330);
     }
@@ -68,8 +56,8 @@ export default class Game extends Phaser.Scene {
       }
     }
 
-    this.moveFondo(this.personaje.body.velocity.x);
-    this.movePiso(this.personaje.body.velocity.x);
+    this.moveFondo();
+    this.movePiso();
 
     if (this.input.keyboard.checkDown(this.r, 500)) {
       this.scene.restart();
@@ -84,18 +72,17 @@ export default class Game extends Phaser.Scene {
     this.background.displayHeight = this.game.config.height;
   }
 
-  moveFondo(personajeVelocityX) {
-    this.background.tilePositionX += personajeVelocityX / 10;
+  moveFondo() {
+    this.background.tilePositionX += 2; // Ajusta la velocidad del fondo
   }
 
   addPiso() {
     this.piso = this.add.tileSprite(750, 915, this.game.config.width, 325, "piso").setScale(1, 0.6);
     this.physics.add.existing(this.piso, true);
-    //this.piso.body.setSize(1500, 199);
   }
 
-  movePiso(personajeVelocityX) {
-    this.piso.tilePositionX += personajeVelocityX / 10; // Ajusta este valor para cambiar la velocidad del piso
+  movePiso() {
+    this.piso.tilePositionX += 5; // Ajusta la velocidad del piso
   }
 
   addObstaculos() {
@@ -127,7 +114,7 @@ export default class Game extends Phaser.Scene {
       objeto.setScale(0.20);
     }
 
-   this.physics.add.collider(this.personaje, this.objetos);
+    this.physics.add.collider(this.personaje, this.objetos);
     objeto.setImmovable(true);
     objeto.body.allowGravity = false;
     this.physics.add.collider(this.roca, objeto, this.removeObject, null, this);
@@ -138,7 +125,7 @@ export default class Game extends Phaser.Scene {
   }
   
   addPersonaje() {
-    this.personaje = this.physics.add.sprite(100, 550, "personaje").setScale(0.5);
+    this.personaje = this.physics.add.sprite(450, 715, "personaje").setScale(0.5);
     this.personaje.setBounce(0.2);
     this.personaje.setCollideWorldBounds(true);
 
@@ -162,9 +149,9 @@ export default class Game extends Phaser.Scene {
       repeat: -1
     });
 
+    this.personaje.anims.play("right");
     this.physics.add.collider(this.personaje, this.piso);
   }
-
 
   addTeclas() {
     this.cursor = this.input.keyboard.createCursorKeys();
@@ -172,17 +159,28 @@ export default class Game extends Phaser.Scene {
   }
 
   addArco() {
-    this.arco = this.physics.add.sprite(500, 700, "arco").setScale(0.4);
+    this.arco = this.physics.add.sprite(1570, 730, "arco").setScale(0.4);
+    this.arco.setVelocityX(-200); // Mueve el arco hacia la izquierda
     this.physics.add.collider(this.arco, this.piso);
     this.physics.add.overlap(this.personaje, this.arco, this.collectArco, null, this);
   }
 
   collectArco(personaje, arco) {
     arco.disableBody(true, true);
+    this.arcoEvent.remove(); // Detiene el evento del arco
     this.gameStarted = true; // Empieza el juego cuando el arco es recogido
     this.addRoca();
     this.addEventos();
     this.puntosText.visible = true;
+  }
+
+  createArcoEvent() {
+    this.arcoEvent = this.time.addEvent({
+      delay: 5000,
+      callback: this.addArco,
+      callbackScope: this,
+      loop: true,
+    });
   }
 
   addRoca() {
@@ -196,7 +194,7 @@ export default class Game extends Phaser.Scene {
     this.roca.setX(0);
     this.anims.create({
       key: "rocaAnim",
-      frames: this.anims.generateFrameNumbers("roca", { start: 0, end: 17 }), // Updated end frame to 16
+      frames: this.anims.generateFrameNumbers("roca", { start: 0, end: 17 }), 
       frameRate: 10,
       repeat: -1
     });
@@ -204,13 +202,13 @@ export default class Game extends Phaser.Scene {
   }
 
   handleCollision(personaje, roca) {
-    this.scene.start("End", { score: this.puntos, gameOver: true});
+    this.scene.start("End", { score: this.puntos, gameOver: true });
   }
 
   addEventos() {
-    //obstaculos
+    // Obstáculos
     this.time.addEvent({
-      delay: 3500,
+      delay: 4000,
       callback: this.createObjetos,
       callbackScope: this,
       loop: true,
@@ -218,7 +216,7 @@ export default class Game extends Phaser.Scene {
   }
 
   addPuntos() {
-    this.puntosText = this.add.text(16, 16, 'Puntos: 0', {fontSize: '32px', fill:'#000'});
+    this.puntosText = this.add.text(16, 16, 'Puntos: 0', { fontSize: '32px', fill: '#000' });
     this.puntosText.visible = false;
   }
 }
